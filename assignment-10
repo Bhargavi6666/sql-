@@ -139,4 +139,81 @@ captain|no_of_wins
 160539|4
 160062|3
 .........
+CODE:
+Q1 ="""select `matchcaptain`.captain,`matchcaptain`.team_id,p.jersey_no,p.name,p.date_of_birth,p.age 
+    from player p
+    inner join matchcaptain on `matchcaptain`.captain = p.player_id
+    where p.player_id not in (select player_id from goaldetails)
+    """
+    
+Q2 ="""select team_id,count(`matchteamdetails`.team_id) as no_of_matches
+    from matchteamdetails
+    group by team_id"""
+    
+Q3 ="""select team_id,count(goal_id)/23.0 from goaldetails group by team_id
+ """
+
+Q4 ="""select distinct(captain), count(captain) 
+    from matchcaptain
+    group by captain
+    """
+
+Q5 ="""select count(distinct(`player`.player_id)) as no_players
+    from player 
+    inner join matchcaptain on `matchcaptain`.captain = `player`.player_id
+    inner join match on `match`.player_of_match = `player`.player_id 
+    where `matchcaptain`.match_no = `match`.match_no order by `player`.player_id asc
+    """
+    
+Q6 ="""select distinct(`matchcaptain`.captain)
+    from matchcaptain 
+    where `matchcaptain`.captain
+    not in (select player_of_match from match)
+    """
+    
+Q7 ="""select strftime('%m',play_date) as month ,count(match_no) as k
+    from match
+    group by month 
+    order by k desc 
+    """
+    
+Q8 ="""select jersey_no,count(`matchcaptain`.captain) as no_captains
+    from player
+    inner join matchcaptain on `matchcaptain`.captain = `player`.player_id 
+    group by jersey_no 
+    order by count(`matchcaptain`.captain) desc,`player`.jersey_no desc
+    """
+    
+Q9 ="""select `player`.player_id, avg(`match`.audience) as avg_audience
+    from match
+    inner join matchcaptain on `matchcaptain`.match_no = `match`.match_no
+    inner join player on `matchcaptain`.team_id = `player`.team_id
+    group by `player`.player_id
+    order by avg_audience desc ,player_id desc
+    """
+
+
+
+Q10 ="""select team_id,avg(age) 
+     from player 
+     group by team_id"""
+
+Q11 ="""select avg(age) as avg_age_of_captains 
+     from player
+     inner join matchcaptain on `player`.player_id = `matchcaptain`.captain
+     """
+     
+Q12 ="""select strftime('%m',date_of_birth) as month ,count(player_id)
+    from player
+    group by month
+    order by count(player_id) desc,month desc 
+    """
+Q13 ="""select captain,count(`matchteamdetails`.win_lose) as no_of_wins 
+    from matchteamdetails
+    inner join matchcaptain on `matchcaptain`.match_no = `matchteamdetails`.match_no 
+    where win_lose =='W' and `matchteamdetails`.team_id = `matchcaptain`.team_id 
+    GROUP BY CAPTAIN order by no_of_wins desc 
+    """   
+    
+
 
