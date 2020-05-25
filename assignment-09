@@ -1,0 +1,149 @@
+Tables:
+
+Team
+Match
+Player
+MatchTeamDetails:
+MatchCaptain
+GoalDetails
+Coding Guidelines:
+
+Write your queries in query.py
+Query for each question is to be assigned to a variable in the above metioned python file.
+# Query Submission Guideline
+Assign your query string to a variable with name have the following format
+
+Q{question Number}="Write your query here"
+
+Below are variable names for question 1 and 2 queries
+
+Q1="Write your query here"
+Q2="Write your query here"
+
+#Questions
+# Task 1
+Get the average age of all the players in the database - [2 Points]
+
+# Sample Output Format
+3.245989213123125123
+
+# Task 2
+Get match_no and play_date of all the matches which have more than 50000 audience - [2 Points]
+Your query should return match_no, play_date in ascending order of match_no.
+
+# Sample Output Format
+1	2016-06-11
+2	2016-02-12
+3	2018-02-01
+
+# Task 3
+Get the team_id and the number of matches the team has won for each team in the database (Only consider teams which have played atleast one match) - [2 Points]
+Your query should return in the descending order of the number of matches won and then in the ascending ordering of team_id
+
+# Sample Output Format
+10012	4
+10013	3
+10014	0
+
+# Task 4
+Get the match_no, play_date for all matches whose stop1_sec is greater than average stop1_sec across all matches - [3 Points]
+Your query should return match_no and play_date in descending order of match_no
+
+# Sample Output Format
+  3	2016-06-11
+  2	2016-04-11
+  1	2016-02-11
+
+# Task 5
+Get the team names and their captain names for all the matches in the database - [3 Points]
+Your query should return match_no, team name and the captain name in ascending order of match_no and team name
+
+# Sample Output Format
+1	UK	Rob
+1	USA	Mike
+3	UK	John
+
+# Task 6
+Get the name of the player_of_the_match and his/her jersey_no for all the matches in the database - [3 Points]
+Your query should result in match_no, player name and his/her jersey_no in ascending order of match_no
+
+# Sample Output Format
+ 1	Mike	6
+ 2	Rob	8
+ 3	Pike	1
+
+# Task 7
+Get the team name and the average age of players in that team for all the teams whose average age is greater than 26 - [3 Points]
+Your query should result in team name and average_age in ascending order of name
+
+# Sample Output Format
+UK	38.3
+USA	27.5
+
+# Task 8
+Get the total number of goals scored by all players whose age is less than or equal to 27 - [3 Points]
+Your query should return player name, jersey_no, age and the number of goals scored in the descending order of the number of goals and then ascending order of player name. (Consider only the players who scored atleast one goal)
+
+# Sample Output Format
+Rob	4	23	8
+Pike	3	21	6
+John	1	22	3
+
+# Task 9
+Get the percentage of goals each team has scored. - [5 Points]
+percentage of goals scored by a team = (total number of goals scored by the team across all matches * 100) / total number of goals scored by all the teams acrosss all matches
+Your query should return the team_id and the percentage of goals. (Consider only the teams which scored atleast one goal)
+
+# Sample Output Format
+   1	9.41234..
+   2	30.58766..
+   3	60.0
+
+# Task 10
+Get the average of total number of goals scored by a team across all the matches - [5 Points]
+
+# Sample Output Format
+1.8
+
+# Task 11
+Get all the players who didn’t score in any of the matches. - [5 Points]
+Your query should return player_id, name and date_of_birth in the ascending order of player_id.
+
+# Sample Output Format
+1	Rob	1989-03-10	 
+2	Mike	1989-03-10	 
+3	Bob	1989-03-10	 
+
+# Task 12
+Get the audience count and the difference between the audience count and the teams average audience count for all matches in the database. - [7 Points]
+Your query should return team_name, match_no, audience and the difference beteween the audience and the average audience across all matches played by that team in the ascending order of match_no
+
+# Sample Output Format
+USA	1	300000   12340
+UK	2	123123  12340
+Germany	3	123523  12340
+'''''''''''''
+CODE:
+Q1="SELECT AVG(age) from player;"
+
+Q2 ="SELECT MATCH_NO,PLAY_DATE from match where audience> 50000 order by match_no asc"
+
+Q3 ="SELECT TEAM_ID,COUNT(WIN_LOSE) FROM matchteamdetails where win_lose='W' group by team_id  order by  count(match_no) desc,team_id asc" 
+
+Q4 ="SELECT MATCH_NO,PLAY_DATE FROM MATCH WHERE STOP1_SEC > (SELECT AVG(STOP1_SEC) FROM MATCH) ORDER BY MATCH_NO DESC"
+
+Q5 ="SELECT `MATCHCAPTAIN`.MATCH_NO,`TEAM`.NAME,`PLAYER`.NAME FROM PLAYER INNER JOIN TEAM INNER JOIN MATCHCAPTAIN ON `MATCHCAPTAIN`.CAPTAIN=`PLAYER`.PLAYER_ID AND `TEAM`.TEAM_ID=`MATCHCAPTAIN`.TEAM_ID ORDER BY `MATCHCAPTAIN`.MATCH_NO ASC,`TEAM`.NAME ASC;"
+
+Q6="SELECT M.MATCH_NO,P.NAME,P.JERSEY_NO FROM PLAYER P INNER JOIN MATCH M ON M.PLAYER_OF_MATCH=P.PLAYER_ID GROUP BY M.MATCH_NO ORDER BY M.MATCH_NO ASC;"
+
+Q7 ="select `team`.name ,avg(age) from player inner join team on `team`.team_id = `player`.team_id group by `team`.NAME having avg(age) >26 order by `team`.name asc"
+
+Q8 = "select player.name,player.jersey_no,player.age,count(goal_id) from player inner join goaldetails on goaldetails.player_id = player.player_id where player.age <=27 group by player.player_id order by count(goal_id) desc,player.name asc ;"
+
+Q9 = "select team_id ,count(goal_id)*100.0/(select count(goal_id) from goaldetails) as pre_goal from goaldetails group by goaldetails.team_id;"
+
+Q10 = "select avg(avg_goal) from  (select count(goal_id) as avg_goal from goaldetails group by goaldetails.team_id);"
+
+Q11 = "select player_id,player.name,date_of_birth from player where not exists (select player_id from goaldetails where player.player_id = goaldetails.player_id group by player_id having count(goal_id) <> 0);"
+
+
