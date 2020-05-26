@@ -274,16 +274,127 @@ class Student:
                 
             else:
                 query=f"select * from student where {key_result[0]} = {value};"
-        output = read_data(query)
-            
-        if len(output) ==0:
-            return []
+class DoesNotExist(Exception):
+     pass
+class MultipleObjectsReturned(Exception):
+     pass
+     
+class InvalidField(Exception):
+     pass
+
+class Student:
+    def __init__(self,name,age,score):
+        self.name = name
+        self.age = age
+        self.score = score 
+        self.student_id = None
+        
+    def __repr__(self):
+        return "Student(student_id={0}, name={1}, age={2}, score={3})".format(
+            self.student_id,
+            self.name,
+            self.age,
+            self.score)
+
+    @staticmethod
+    def get(**kwargs):
+        for key, value in kwargs.items():
+            if key in ['student_id','age', 'score']:
+                query = 'SELECT * FROM Student WHERE {} = {}'.format(key,value)
+            elif key  == 'name':
+                query = 'SELECT * FROM student where {} = \'{}\' '.format(key,value);
+            else:
+                raise InvalidField
+        result_query = read_data(query)    
+        if len(result_query) == 0:
+            raise DoesNotExist
+        elif len(result_query)>1:
+            raise MultipleObjectsReturned
         else:
-            for i in range(len(output)):
-                student_obj = Student(output[i][1],output[i][2],output[i][3])
-                student_obj.student_id = output[i][0]
-                output_list.append(student_obj)
-            return output_list
+            student_obj = Student(result_query[0][1], result_query[0][2],result_query[0][3])
+            student_obj.student_id = result_query[0][0]
+            return student_obj
+
+    def delete(self):
+        query = 'DELETE FROM Student WHERE student_id = {}'.format(self.student_id);
+        write_data(query)   
+
+ 
+    def save(self):
+        import sqlite3
+        conn = sqlite3.connect("selected_students.sqlite3")
+        crsr = conn.cursor()
+        crsr.execute("PRAGMA foreign_keys= on;")
+        if self.student_id == None:
+            query = 'INSERT INTO Student(student_id,name,age,score) VALUES(Null,\'{}\', {},{})'.format(self.name,self.age,self.score);
+            crsr.execute(query) 
+            self.student_id = crsr.lastrowid
+
+        elif self.name != None:
+            query = 'INSERT or REPLACE INTO Student(student_id,name,age,score) VALUES({},\'{}\', {},{})'.format(self.student_id,self.name,self.age,self.score);
+            crsr.execute(query) 
+
+        conn.commit()
+        conn.close()  
+
+ 
+    @staticmethod
+    def filter(**kwargs):
+        output_list = []
+        extra_list = []
+        id_list =['student_id','name','age','score']
+        
+        for key,value in kwargs.items():
+            key_result = key.split("__")
+            value = value
+                if len(key_result)>1:
+                if key_result[0] not in id_list:
+                    raise InvalidField
+                else:
+                    if key_result[1] == 'lt':
+                        query=f"select * from student where {key_result[0]} < {value};"
+                    
+                    elif key_result[1] == 'lte':
+                        query=f"select * from student where {key_result[0]} <= {value};"
+                    
+                    elif key_result[1] == 'gt':
+                        query=f"select * from student where {key_result[0]} > {value};"
+                    
+                    elif key_result[1] == 'gte':
+                        query=f"select * from student where {key_result[0]} >= {value};"
+                    
+                    elif key_result[1] == 'in':
+                        query=f"select * from student where {key_result[0]} IN {tuple(value)};"
+                    
+                    elif key_result[1] == 'neq':
+                        if key_result[0] == 'name':
+                            query=f"select * from student where {key_result[0]} <> \'{value}\';"
+                        
+                        else:
+                            query=f"select * from student where {key_result[0]} <> {value};"
+                        
+                    elif key_result[1] == 'contains':
+                        query=f"select * from student where {key_result[0]} like \'%{value}%\';"
+                
+            elif len(key_result) ==1:
+                if key_result[0]=='name':
+                    query=f"select * from student where {key_result[0]} = \'{value}\';"
+                
+                else:
+                    query=f"select * from student where {key_result[0]} = {value};"
+            output = read_data(query)
+            extra_list.append(output)
+            
+            resultant =set.intersection(*[set(i) for i in extra_list])
+            resultant = sorted(resultant)
+            
+            
+        for i in range(len(resultant)):
+            student_obj = Student(resultant[i][1],resultant[i][2],resultant[i][3])
+            student_obj.student_id   = resultant[i][0]
+                #print(student_obj)
+            output_list.append(student_obj)
+        return output_list
 
  
 def write_data(sql_query):
@@ -304,6 +415,13 @@ def read_data(sql_query):
     connection.close() 
     return query_output
 
+ 
+ 
+
+ 
+ 
+ 
+ 
  
  
  
