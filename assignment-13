@@ -241,39 +241,7 @@ class Student:
             
         if len(key_result)>1:
             if key_result[0] not in id_list:
-                raise InvalidField
-            else:
-                if key_result[1] == 'lt':
-                    query=f"select * from student where {key_result[0]} < {value};"
-                    
-                elif key_result[1] == 'lte':
-                    query=f"select * from student where {key_result[0]} <= {value};"
-                    
-                elif key_result[1] == 'gt':
-                    query=f"select * from student where {key_result[0]} > {value};"
-                    
-                elif key_result[1] == 'gte':
-                    query=f"select * from student where {key_result[0]} >= {value};"
-                    
-                elif key_result[1] == 'in':
-                    query=f"select * from student where {key_result[0]} IN {tuple(value)};"
-                    
-                elif key_result[1] == 'neq':
-                    if key_result[0] == 'name':
-                        query=f"select * from student where {key_result[0]} <> \'{value}\';"
-                        
-                    else:
-                        query=f"select * from student where {key_result[0]} <> {value};"
-                        
-                elif key_result[1] == 'contains':
-                    query=f"select * from student where {key_result[0]} like \'%{value}%\';"
-                
-        elif len(key_result) ==1:
-            if key_result[0]=='name':
-                query=f"select * from student where {key_result[0]} = \'{value}\';"
-                
-            else:
-                query=f"select * from student where {key_result[0]} = {value};"
+
 class DoesNotExist(Exception):
      pass
 class MultipleObjectsReturned(Exception):
